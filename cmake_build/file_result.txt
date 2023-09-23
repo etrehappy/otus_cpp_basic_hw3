@@ -1,0 +1,3 @@
+Torin	1
+Dori	4
+Dvalin	2
