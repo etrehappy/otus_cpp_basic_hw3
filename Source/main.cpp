@@ -1,6 +1,6 @@
 #include "main.h"
 
-//Base tasks
+//Base task
 int max_number = 100;
 const int min_number = 0;
 constexpr int max_int_size = std::numeric_limits<int>::max();
@@ -35,14 +35,14 @@ void Get_User_Value(int &user_value, const int &max_number)
     }
 }
 
-void Compare(int &counter_user_attempt, const int &max_number)
+void Compare(int &attempt_count, const int &max_number)
 {
-    int random_number = Get_Some_Number(max_number);
-    int user_value = -1;
+    const int random_number = Get_Some_Number(max_number);
+    int user_value = -1; //it is error value, need >= 0
   
-    for (counter_user_attempt = 0; user_value != random_number; counter_user_attempt++)
+    for (attempt_count = 0; user_value != random_number; attempt_count++)
     {
-        if (counter_user_attempt > 0)
+        if (attempt_count > 0)
         {
             if (user_value > random_number)           
                 std::cout << user_value  << " is greater. Try to guess again: ";
@@ -55,7 +55,7 @@ void Compare(int &counter_user_attempt, const int &max_number)
     }
 }
 
-void Save(std::string &user_name, int &counter_user_attempt)
+void Save(std::string &user_name, int &attempt_count)
 {
     std::ofstream file(file_path, std::ios::app);
 
@@ -65,7 +65,7 @@ void Save(std::string &user_name, int &counter_user_attempt)
         return;
     }
 
-    file << user_name << "\t" << counter_user_attempt << std::endl;
+    file << user_name << "\t" << attempt_count << std::endl;
     file.close();
 }
  
@@ -89,12 +89,13 @@ void View_List_Results() // This function uses only with argument "-table" beaca
 // 1, 2, 5
 void Treat_Arguments(int i, std::string parametr, char** argv)
 {
+    //extra 1
     if (parametr == "-max")
     {
         try
         {
             if (argv[i + 1] == NULL)
-                throw std::exception("The argument '-max' requires some integer > 0. Example: -max 50");
+                throw std::exception("The argument '-max' requires some integer > 0 (example: -max 50). The max has been autoset.");
 
             max_number = std::stoi(argv[i + 1]); //convertation from char to integer
         }
@@ -107,6 +108,7 @@ void Treat_Arguments(int i, std::string parametr, char** argv)
         return;
     }
 
+    //extra 5
     if (parametr == "-level")
     {
         int level = 0;
@@ -142,7 +144,8 @@ void Treat_Arguments(int i, std::string parametr, char** argv)
 
         return;
     }
-
+    
+    //extra 2
     if (parametr == "-table")
     {
         View_List_Results();
@@ -153,7 +156,7 @@ void Treat_Arguments(int i, std::string parametr, char** argv)
 
 void Treat_Arguments(int& argc, char** argv)
 {
-    //task 5 !!!
+    //extra 5
     for (int i = 1; i < argc; i++)
     {
         std::string parametr = argv[i];
@@ -177,9 +180,74 @@ void Treat_Arguments(int& argc, char** argv)
 }
 
 // 3, 4
+
+void Fill_Two_Vectors(std::fstream& file, std::vector<std::string>& user_names, std::vector<int>& user_results)
+{
+    int i = 0;
+    int max_count_name = 0;
+    bool is_first_iteration = true;
+    std::string name_i, result_i;
+    int result;
+
+    while (!file.eof())
+    {
+        std::getline(file, name_i, '\t');
+
+        std::getline(file, result_i, '\n');
+        result = std::stoi(result_i);
+
+        if (is_first_iteration)
+        {
+            user_names.push_back(name_i);
+            user_results.push_back(result);
+            is_first_iteration = false;
+            ++i;
+            continue;
+        }
+
+        max_count_name = (int)user_names.size() - 1;
+        for (int j = 0; j <= max_count_name; j++)
+        {
+            if (name_i == user_names[j])
+            {
+                if (result < user_results[j])
+                    user_results[j] = result;
+
+                break;
+            }
+
+            if (j == max_count_name)
+            {
+                user_names.push_back(name_i);
+                user_results.push_back(result);
+                ++i;
+                break;
+            }
+        }
+    }
+
+    //clear last excess string (this string contains '\n' because of the use of Save() )
+    user_names.pop_back();
+    user_results.pop_back();
+}
+
+void Print_and_Save_Min_Result(std::fstream& file, std::vector<std::string>& user_names, std::vector<int>& user_results)
+{
+    std::cout << "----\t" << "-----------"
+        << "\nName\t" << "Best scores\n"
+        << "----\t" << "-----------" << std::endl;
+
+    for (int l = 0; l < user_names.size(); l++)
+    {
+        std::cout << user_names[l] << '\t' << user_results[l] << std::endl;
+        file << user_names[l] << '\t' << user_results[l] << std::endl;
+    }
+
+}
+
 void View_and_Save_Min_Result()
 {
-    // GET vector of name  and vector of results from file
+    // preparation: GET vector of name  and vector of results from file
 
     std::vector<std::string> user_names;
     std::vector<int> user_results;
@@ -194,74 +262,14 @@ void View_and_Save_Min_Result()
         return;
     }
 
-    file.seekg(0);
-
-    int i = 0;
-    int max_count_name = 0;
-    bool is_first_iteration = true;
-    std::string i_string_name, i_string_result;
-    int i_result;
-
-    while (!file.eof())
-    {
-        std::getline(file, i_string_name, '\t');
-
-        std::getline(file, i_string_result, '\n');
-        i_result = std::stoi(i_string_result);
-
-        if (is_first_iteration)
-        {
-            user_names.push_back(i_string_name);
-            user_results.push_back(i_result);
-            is_first_iteration = false;
-            ++i;
-            continue;
-        }
-
-        max_count_name = (int)user_names.size() - 1;
-        for (int j = 0; j <= max_count_name; j++)
-        {
-            if (i_string_name == user_names[j])
-            {
-                if (i_result < user_results[j])
-                    user_results[j] = i_result;
-
-                break;
-            }
-
-            if (j == max_count_name)
-            {
-                user_names.push_back(i_string_name);
-                user_results.push_back(i_result);
-                ++i;
-                break;
-            }
-        }
-    }
-
-    //clear last excess string (this string contains '\n' because of the use of Save() )
-    user_names.pop_back();
-    user_results.pop_back();
-
+    file.seekg(0); 
+    Fill_Two_Vectors(file, user_names, user_results);
     file.close();
-
-
 
     // VIEW table and SAVE result
 
     file.open(file_path, std::ios::out | std::ios::trunc);
-
-    std::cout << "----\t" << "------"
-        << "\nName\t" << "Scores\n"
-        << "----\t" << "------" << std::endl;
-
-    for (int l = 0; l < user_names.size(); l++)
-    {
-        std::cout << user_names[l] << '\t' << user_results[l] << std::endl;
-        file << user_names[l] << '\t' << user_results[l] << std::endl;
-    }
-
-    file.flush();
+    Print_and_Save_Min_Result( file, user_names, user_results);   
     file.close();
 }
 
@@ -294,13 +302,12 @@ bool Play_Again()
 
 int main(int argc, char *argv[])
 {   
-    Treat_Arguments(argc, argv);
+    Treat_Arguments(argc, argv); //extra task
    
     std::srand((unsigned int)std::time(nullptr));
 
     std::string user_name;
-    int counter_user_attempt = 0;
-
+    int attempt_count = 0;
 
     Get_User_Name(user_name);
 
@@ -310,13 +317,13 @@ int main(int argc, char *argv[])
     {
         std::cout << "\nThe computer thinking of a number from 0 to " << max_number << ". Guess and enter this number: ";
 
-        Compare(counter_user_attempt, max_number);
-        Save(user_name, counter_user_attempt);
-        std::cout << "You Win! Your attempt = " << counter_user_attempt << std::endl;
+        Compare(attempt_count, max_number);
+        Save(user_name, attempt_count);
+        std::cout << "You Win! Your attempt = " << attempt_count << std::endl;
 
     } while (Play_Again() );
 
-    View_and_Save_Min_Result();
+    View_and_Save_Min_Result(); //extra task
        
     std::cout << "\n***** END GAME *****\n" << std::endl;
 
