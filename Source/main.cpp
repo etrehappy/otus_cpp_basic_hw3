@@ -9,32 +9,6 @@ constexpr char max_char_size = std::numeric_limits<char>::max();
 const std::string file_path("file_result.txt");
 
 
-void Get_User_Name(std::string &user_name)
-{
-    std::cout << "Please, enter your name: ";
-    std::cin >> user_name;
-}
-
-int Get_Some_Number(const int &max_number)
-{
-    int some_number = std::rand() % max_number;
-    
-    return some_number;
-}
-
-void Get_User_Value(int &user_value, const int &max_number)
-{
-    std::cin >> user_value;
-
-    while (std::cin.fail() || (user_value > max_number) || (user_value < min_number) )
-    {
-        std::cin.clear();
-        std::cin.ignore(max_int_size, '\n');
-        std::cout << "Error. Enter integer from 0 untill " << max_number << ": ";
-        std::cin >> user_value;
-    }
-}
-
 void Compare(int &attempt_count, const int &max_number)
 {
     const int random_number = Get_Some_Number(max_number);
@@ -68,6 +42,33 @@ void Save(std::string &user_name, int &attempt_count)
     file << user_name << "\t" << attempt_count << std::endl;
     file.close();
 }
+
+
+void Get_User_Name(std::string &user_name)
+{
+    std::cout << "Please, enter your name: ";
+    std::cin >> user_name;
+}
+
+int Get_Some_Number(const int &max_number)
+{
+    int some_number = std::rand() % max_number;
+    
+    return some_number;
+}
+
+void Get_User_Value(int &user_value, const int &max_number)
+{
+    std::cin >> user_value;
+
+    while (std::cin.fail() || (user_value > max_number) || (user_value < min_number) )
+    {
+        std::cin.clear();
+        std::cin.ignore(max_int_size, '\n');
+        std::cout << "Error. Enter integer from 0 untill " << max_number << ": ";
+        std::cin >> user_value;
+    }
+}
  
 void View_List_Results() // This function uses only with argument "-table" beacause there is a extra-task function "View_and_Save_Min_Result()"
 {
@@ -87,6 +88,32 @@ void View_List_Results() // This function uses only with argument "-table" beaca
 
 //Extra tasks: 
 // 1, 2, 5
+
+void Treat_Arguments(int& argc, char** argv)
+{
+    //extra 5
+    for (int i = 1; i < argc; i++)
+    {
+        std::string parametr = argv[i];
+
+        if (parametr == "-max" || parametr == "-level")
+        {
+            for (int j = 2; j < argc; j++)
+            {
+                std::string double_parametr = argv[j];
+
+                if (double_parametr == "-max" || double_parametr == "-level")
+                {
+                    std::cout << "Error. Set only one parametr: '-max' OR '-level' " << std::endl;
+                    exit(0);
+                }
+            }
+        }
+
+        Treat_Arguments(i, parametr, argv);
+    }
+}
+
 void Treat_Arguments(int i, std::string parametr, char** argv)
 {
     //extra 1
@@ -154,32 +181,34 @@ void Treat_Arguments(int i, std::string parametr, char** argv)
     }
 }
 
-void Treat_Arguments(int& argc, char** argv)
-{
-    //extra 5
-    for (int i = 1; i < argc; i++)
-    {
-        std::string parametr = argv[i];
-
-        if (parametr == "-max" || parametr == "-level")
-        {
-            for (int j = 2; j < argc; j++)
-            {
-                std::string double_parametr = argv[j];
-
-                if (double_parametr == "-max" || double_parametr == "-level")
-                {
-                    std::cout << "Error. Set only one parametr: '-max' OR '-level' " << std::endl;
-                    exit(0);
-                }
-            }
-        }
-
-        Treat_Arguments(i, parametr, argv);
-    }
-}
-
 // 3, 4
+void View_and_Save_Min_Result()
+{
+    // preparation: GET vector of name  and vector of results from file
+
+    std::vector<std::string> user_names;
+    std::vector<int> user_results;
+
+    std::fstream file;
+
+    file.open(file_path, std::ios::in);
+
+    if (!file.is_open())
+    {
+        std::cout << "Error. The save-file is not open. You can't view result table.";
+        return;
+    }
+
+    file.seekg(0); 
+    Fill_Two_Vectors(file, user_names, user_results);
+    file.close();
+
+    // VIEW table and SAVE result
+
+    file.open(file_path, std::ios::out | std::ios::trunc);
+    Print_and_Save_Min_Result( file, user_names, user_results);   
+    file.close();
+}
 
 void Fill_Two_Vectors(std::fstream& file, std::vector<std::string>& user_names, std::vector<int>& user_results)
 {
@@ -243,34 +272,6 @@ void Print_and_Save_Min_Result(std::fstream& file, std::vector<std::string>& use
         file << user_names[l] << '\t' << user_results[l] << std::endl;
     }
 
-}
-
-void View_and_Save_Min_Result()
-{
-    // preparation: GET vector of name  and vector of results from file
-
-    std::vector<std::string> user_names;
-    std::vector<int> user_results;
-
-    std::fstream file;
-
-    file.open(file_path, std::ios::in);
-
-    if (!file.is_open())
-    {
-        std::cout << "Error. The save-file is not open. You can't view result table.";
-        return;
-    }
-
-    file.seekg(0); 
-    Fill_Two_Vectors(file, user_names, user_results);
-    file.close();
-
-    // VIEW table and SAVE result
-
-    file.open(file_path, std::ios::out | std::ios::trunc);
-    Print_and_Save_Min_Result( file, user_names, user_results);   
-    file.close();
 }
 
 //My

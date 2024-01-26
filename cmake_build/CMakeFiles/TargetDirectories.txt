@@ -1,0 +1,3 @@
+C:/Users/etreh/Documents/Programming/Otus/C++_Developer/Basic/otus_cpp_basic/otus_cpp_basic_hw3/cmake_build/CMakeFiles/guess_the_number.dir
+C:/Users/etreh/Documents/Programming/Otus/C++_Developer/Basic/otus_cpp_basic/otus_cpp_basic_hw3/cmake_build/CMakeFiles/ALL_BUILD.dir
+C:/Users/etreh/Documents/Programming/Otus/C++_Developer/Basic/otus_cpp_basic/otus_cpp_basic_hw3/cmake_build/CMakeFiles/ZERO_CHECK.dir
